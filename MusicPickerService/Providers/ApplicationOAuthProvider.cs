@@ -15,18 +15,6 @@ namespace MusicPickerService.Providers
 {
     public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
     {
-        private readonly string _publicClientId;
-
-        public ApplicationOAuthProvider(string publicClientId)
-        {
-            if (publicClientId == null)
-            {
-                throw new ArgumentNullException("publicClientId");
-            }
-
-            _publicClientId = publicClientId;
-        }
-
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
@@ -66,21 +54,6 @@ namespace MusicPickerService.Providers
             if (context.ClientId == null)
             {
                 context.Validated();
-            }
-
-            return Task.FromResult<object>(null);
-        }
-
-        public override Task ValidateClientRedirectUri(OAuthValidateClientRedirectUriContext context)
-        {
-            if (context.ClientId == _publicClientId)
-            {
-                Uri expectedRootUri = new Uri(context.Request.Uri, "/");
-
-                if (expectedRootUri.AbsoluteUri == context.RedirectUri)
-                {
-                    context.Validated();
-                }
             }
 
             return Task.FromResult<object>(null);
