@@ -10,7 +10,7 @@ namespace MusicPickerService.Models
     public class Track
     {
         [Key]
-        public int TrackID { get; set; }
+        public int Id { get; set; }
 
         public int GenreID { get; set; }
         public Genre Genre { get; set; }

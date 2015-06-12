@@ -10,7 +10,7 @@ namespace MusicPickerService.Models
     public class Album
     {
         [Key]
-        public int AlbumID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public uint Year { get; set; }
 

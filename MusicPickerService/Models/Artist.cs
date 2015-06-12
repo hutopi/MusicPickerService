@@ -10,7 +10,7 @@ namespace MusicPickerService.Models
     public class Artist
     {
         [Key]
-        public int ArtistID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string MbId { get; set; }
         public virtual ICollection<Album> Albums { get; set; }
