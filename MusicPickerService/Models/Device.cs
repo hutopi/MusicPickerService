@@ -14,10 +14,7 @@ namespace MusicPickerService.Models
         public int Id { get; set; }
 
         [IgnoreDataMember]
-        public int OwnerID { get; set; }
-
-        [IgnoreDataMember]
-        public int Owner { get; set; } // owner @TODO
+        public int ApplicationUser { get; set; }
 
         public DateTime RegistrationDate { get; set; }
         public DateTime AccessDate { get; set; }
