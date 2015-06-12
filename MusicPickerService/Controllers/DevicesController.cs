@@ -8,18 +8,46 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using MusicPickerService.Models;
 
 namespace MusicPickerService.Controllers
 {
+    [Authorize]
     public class DevicesController : ApiController
     {
-        private Context db = new Context();
-
-        // GET: api/Devices
-        public IQueryable<Device> GetDevices()
+        private ApplicationDbContext db
         {
-            return db.Devices;
+            get { return Request.GetOwinContext().Get<ApplicationDbContext>(); }
+        }
+
+        private ApplicationUserManager UserManager
+        {
+            get
+            {
+                return Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+        }
+
+        private ApplicationUser CurrentUser
+        {
+            get
+            {
+                return UserManager.FindById(User.Identity.GetUserId());
+            }
+        }
+
+        public List<Device> GetDevices()
+        {
+            IQueryable<Device> result = from device in db.Devices
+                where device.Owner == CurrentUser
+                select device;
+            List<Device> r = result.ToList();
+
+            return r;
         }
 
         // GET: api/Devices/5
@@ -32,57 +60,37 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
+            if (!isDeviceOwner(device))
+            {
+                return Unauthorized();
+            }
+
             return Ok(device);
-        }
-
-        // PUT: api/Devices/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutDevice(int id, Device device)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != device.Id)
-            {
-                return BadRequest();
-            }
-
-            db.Entry(device).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DeviceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/Devices
         [ResponseType(typeof(Device))]
-        public IHttpActionResult PostDevice(Device device)
+        public IHttpActionResult PostDevice(DeviceBindingModel input)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            DateTime now = DateTime.Now;
+
+            Device device = new Device()
+            {
+                Owner = CurrentUser,
+                Name = input.Name,
+                AccessDate = now,
+                RegistrationDate = now
+            };
+
             db.Devices.Add(device);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = device.Id }, device);
+            return Ok(device);
         }
 
         // DELETE: api/Devices/5
@@ -113,6 +121,15 @@ namespace MusicPickerService.Controllers
         private bool DeviceExists(int id)
         {
             return db.Devices.Count(e => e.Id == id) > 0;
+        }
+
+        private bool isDeviceOwner(Device device)
+        {
+            if (device.Owner == CurrentUser)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

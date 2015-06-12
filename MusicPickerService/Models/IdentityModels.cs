@@ -29,5 +29,7 @@ namespace MusicPickerService.Models
         {
             return new ApplicationDbContext();
         }
+        
+        public System.Data.Entity.DbSet<MusicPickerService.Models.Device> Devices { get; set; }
     }
 }

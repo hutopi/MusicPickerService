@@ -205,8 +205,8 @@
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\Album.cs" />
     <Compile Include="Models\Artist.cs" />
-    <Compile Include="Models\Context.cs" />
     <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\DeviceBindingModels.cs" />
     <Compile Include="Models\Genre.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Track.cs" />
