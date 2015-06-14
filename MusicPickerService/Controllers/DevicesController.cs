@@ -17,6 +17,7 @@ using MusicPickerService.Models;
 namespace MusicPickerService.Controllers
 {
     [Authorize]
+    [RoutePrefix("api/Devices")]
     public class DevicesController : ApiController
     {
         private ApplicationDbContext db
@@ -117,6 +118,74 @@ namespace MusicPickerService.Controllers
             db.SaveChanges();
 
             return Ok(device);
+        }
+
+        [Route("{id}/Submit")]
+        [HttpPost]
+        public IHttpActionResult SubmitMusic(int id, List<DeviceSubmission> submissions)
+        {
+            foreach (DeviceSubmission submission in submissions)
+            {
+                Artist artist;
+                if (db.Artists.Count(a => a.Name == submission.Artist) == 0)
+                {
+                    artist = new Artist() {Name = submission.Artist};
+                    db.Artists.Add(artist);
+                }
+                else
+                {
+                    artist = (from a in db.Artists
+                        where a.Name == submission.Artist
+                        select a).First();
+                }
+                db.SaveChanges();
+
+                Album album;
+                if (db.Albums.Count(a => a.Name == submission.Album && a.ArtistId == artist.Id) == 0)
+                {
+                    album = new Album() { Name = submission.Album, Year = submission.Year, ArtistId = artist.Id};
+                    db.Albums.Add(album);
+                }
+                else
+                {
+                    album = (from a in db.Albums
+                              where a.Name == submission.Album && a.ArtistId == artist.Id
+                              select a).First();
+                }
+                db.SaveChanges();
+
+                Track track;
+                if (db.Tracks.Count(t => t.Name == submission.Title && t.AlbumId == album.Id) == 0)
+                {
+                    track = new Track()
+                    {
+                        Name = submission.Title, 
+                        Number = (int) submission.Number,
+                        AlbumId = album.Id
+                    };
+                    db.Tracks.Add(track);
+                }
+                else
+                {
+                    track = (from t in db.Tracks
+                             where t.Name == submission.Title && t.AlbumId == album.Id
+                             select t).First();
+                }
+                db.SaveChanges();
+
+                if (db.DeviceTracks.Count(dt => dt.DeviceId == id && dt.TrackId == track.Id) == 0)
+                {
+                    DeviceTracks deviceTrack = new DeviceTracks()
+                    {
+                        DeviceId = id,
+                        TrackId = track.Id
+                    };
+                    db.DeviceTracks.Add(deviceTrack);
+                    db.SaveChanges();
+                }
+            }
+
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

@@ -207,12 +207,22 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201506142156169_InitialCreate.cs" />
+    <Compile Include="Migrations\201506142156169_InitialCreate.Designer.cs">
+      <DependentUpon>201506142156169_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201506142239537_OptionalGenre.cs" />
+    <Compile Include="Migrations\201506142239537_OptionalGenre.Designer.cs">
+      <DependentUpon>201506142239537_OptionalGenre.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\Album.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\DeviceBindingModels.cs" />
+    <Compile Include="Models\DeviceSubmission.cs" />
     <Compile Include="Models\DeviceTracks.cs" />
     <Compile Include="Models\Genre.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -287,6 +297,14 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201506142156169_InitialCreate.resx">
+      <DependentUpon>201506142156169_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201506142239537_OptionalGenre.resx">
+      <DependentUpon>201506142239537_OptionalGenre.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

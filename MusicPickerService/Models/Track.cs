@@ -22,7 +22,7 @@ namespace MusicPickerService.Models
         public int AlbumId { get; set; }
         public virtual Album Album { get; set; }
 
-        public int GenreId { get; set; }
+        public int? GenreId { get; set; }
         public virtual Genre Genre { get; set; }
 
         public virtual ICollection<DeviceTracks> DeviceTracks { get; set; }
