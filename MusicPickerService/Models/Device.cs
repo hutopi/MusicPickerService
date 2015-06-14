@@ -16,6 +16,7 @@ namespace MusicPickerService.Models
         [DataMember]
         public int Id { get; set; }
 
+        public string OwnerId { get; set; }
         public virtual ApplicationUser Owner { get; set; }
 
         [DataMember]

@@ -43,7 +43,7 @@ namespace MusicPickerService.Controllers
         public List<Device> GetDevices()
         {
             IQueryable<Device> result = from device in db.Devices
-                where device.Owner == CurrentUser
+                where device.OwnerId == CurrentUser.Id
                 select device;
             List<Device> r = result.ToList();
 
