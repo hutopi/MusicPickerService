@@ -124,6 +124,19 @@ namespace MusicPickerService.Controllers
         [HttpPost]
         public IHttpActionResult SubmitMusic(int id, List<DeviceSubmission> submissions)
         {
+            Device device = db.Devices.Find(id);
+            if (device == null)
+            {
+                return NotFound();
+            }
+
+            if (!isDeviceOwner(device))
+            {
+                return Unauthorized();
+            }
+
+            db.DeviceTracks.RemoveRange(db.DeviceTracks.Where(e => e.DeviceId == id));
+
             foreach (DeviceSubmission submission in submissions)
             {
                 Artist artist;
