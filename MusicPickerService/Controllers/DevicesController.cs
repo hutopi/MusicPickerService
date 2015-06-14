@@ -103,6 +103,11 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
+            if (!isDeviceOwner(device))
+            {
+                return Unauthorized();
+            }
+
             db.Devices.Remove(device);
             db.SaveChanges();
 
