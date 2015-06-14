@@ -28,6 +28,6 @@ namespace MusicPickerService.Models
         [DataMember]
         public string Name { get; set; }
 
-        public virtual ICollection<Track> Tracks { get; set; }
+        public virtual ICollection<DeviceTracks> DeviceTracks { get; set; }
     }
 }

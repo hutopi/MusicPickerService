@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿using System.Data.Entity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace MusicPickerService.Models
 {
@@ -14,6 +15,11 @@ namespace MusicPickerService.Models
             return new ApplicationDbContext();
         }
 
-        public System.Data.Entity.DbSet<MusicPickerService.Models.Device> Devices { get; set; }
+        public DbSet<Device> Devices { get; set; }
+        public DbSet<Artist> Artists { get; set; }
+        public DbSet<Album> Albums { get; set; }
+        public DbSet<Track> Tracks { get; set; }
+        public DbSet<Genre> Genres { get; set; }
+        public DbSet<DeviceTracks> DeviceTracks { get; set; } 
     }
 }

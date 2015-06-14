@@ -11,15 +11,20 @@ namespace MusicPickerService.Models
     {
         [Key]
         public int Id { get; set; }
-
-        public int GenreID { get; set; }
-        public Genre Genre { get; set; }
-
-        public int AlbumID { get; set; }
-        public Album Album { get; set; }
+        
+        [Required]
+        public string Name { get; set; }
 
         public int Number { get; set; }
+        public string MbId { get; set; }
 
-        public virtual ICollection<Device> Devices { get; set; }
+        [Required]
+        public int AlbumId { get; set; }
+        public virtual Album Album { get; set; }
+
+        public int GenreId { get; set; }
+        public virtual Genre Genre { get; set; }
+
+        public virtual ICollection<DeviceTracks> DeviceTracks { get; set; }
     }
 }

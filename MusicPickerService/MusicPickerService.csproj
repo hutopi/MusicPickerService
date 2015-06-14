@@ -43,6 +43,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -209,6 +210,7 @@
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\DeviceBindingModels.cs" />
+    <Compile Include="Models\DeviceTracks.cs" />
     <Compile Include="Models\Genre.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Track.cs" />

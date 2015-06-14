@@ -11,8 +11,12 @@ namespace MusicPickerService.Models
     {
         [Key]
         public int Id { get; set; }
+
+        [Required]
         public string Name { get; set; }
+
         public string MbId { get; set; }
+      
         public virtual ICollection<Album> Albums { get; set; }
     }
 }
