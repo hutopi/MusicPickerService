@@ -77,6 +77,11 @@ namespace MusicPickerService.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (DeviceExists(CurrentUser.Id, input.Name))
+            {
+                return BadRequest(String.Format("Device with name {0} already exists", input.Name));
+            }
+
             DateTime now = DateTime.Now;
 
             Device device = new Device()
@@ -126,6 +131,20 @@ namespace MusicPickerService.Controllers
         private bool DeviceExists(int id)
         {
             return db.Devices.Count(e => e.Id == id) > 0;
+        }
+
+        private bool DeviceExists(string ownerId, string deviceName)
+        {
+            int count = (from device in db.Devices
+                where device.OwnerId == ownerId && device.Name == deviceName
+                select device).Count();
+
+            if (count != 0)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private bool isDeviceOwner(Device device)
