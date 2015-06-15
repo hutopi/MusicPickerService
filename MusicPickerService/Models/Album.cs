@@ -20,7 +20,7 @@ namespace MusicPickerService.Models
         public string Name { get; set; }
 
         [DataMember]
-        public uint Year { get; set; }
+        public int Year { get; set; }
         [DataMember]
         public string MbId { get; set; }
 

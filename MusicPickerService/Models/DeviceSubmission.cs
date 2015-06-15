@@ -9,8 +9,8 @@ namespace MusicPickerService.Models
         public string Album { get; set; }
         public string Title { get; set; }
         public string Genre { get; set; }
-        public uint Year { get; set; }
-        public uint Number { get; set; }
+        public int Year { get; set; }
+        public int Number { get; set; }
         public uint Count { get; set; }
     }
 }

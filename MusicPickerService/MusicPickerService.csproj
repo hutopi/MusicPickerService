@@ -215,6 +215,10 @@
     <Compile Include="Migrations\201506142239537_OptionalGenre.Designer.cs">
       <DependentUpon>201506142239537_OptionalGenre.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201506150032310_YearField.cs" />
+    <Compile Include="Migrations\201506150032310_YearField.Designer.cs">
+      <DependentUpon>201506150032310_YearField.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\Album.cs" />
@@ -304,6 +308,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201506142239537_OptionalGenre.resx">
       <DependentUpon>201506142239537_OptionalGenre.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201506150032310_YearField.resx">
+      <DependentUpon>201506150032310_YearField.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

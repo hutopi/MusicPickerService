@@ -173,7 +173,7 @@ namespace MusicPickerService.Controllers
                     track = new Track()
                     {
                         Name = submission.Title, 
-                        Number = (int) submission.Number,
+                        Number = submission.Number,
                         AlbumId = album.Id
                     };
                     db.Tracks.Add(track);
