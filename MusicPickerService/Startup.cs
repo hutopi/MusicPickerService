@@ -13,8 +13,8 @@ namespace MusicPickerService
         public void Configuration(IAppBuilder app)
         {
             ConfigureDbContext(app);
-            ConfigureAuth(app);
             ConfigureSignalr(app);
+            ConfigureAuth(app);
         }
     }
 }
