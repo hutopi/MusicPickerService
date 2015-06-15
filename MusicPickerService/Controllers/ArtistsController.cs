@@ -4,11 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using MusicPickerService.Models;
 
 namespace MusicPickerService.Controllers
 {
+    [Authorize]
     public class ArtistsController : ApiController
     {
         private ApplicationDbContext db
@@ -16,18 +18,54 @@ namespace MusicPickerService.Controllers
             get { return Request.GetOwinContext().Get<ApplicationDbContext>(); }
         }
 
-        [HttpGet]
-        public IEnumerable<Artist> GetByDevice(int device)
+        private ApplicationUserManager UserManager
         {
-            return (from d in db.DeviceTracks
-                    where d.DeviceId == device
-                    select d.Track.Album.Artist).Distinct().ToList();
+            get
+            {
+                return Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+        }
+
+        private ApplicationUser CurrentUser
+        {
+            get
+            {
+                return UserManager.FindById(User.Identity.GetUserId());
+            }
         }
 
         [HttpGet]
-        public string Get(int id)
+        public IHttpActionResult GetByDevice(int device)
         {
-            return "value";
+            Device currentDevice = db.Devices.Find(device);
+            if (currentDevice == null)
+            {
+                return NotFound();
+            }
+
+            if (!isDeviceOwner(currentDevice))
+            {
+                return Unauthorized();
+            }
+
+            return Ok((from d in db.DeviceTracks
+                    where d.DeviceId == device
+                    select d.Track.Album.Artist).Distinct().ToList());
+        }
+
+        [HttpGet]
+        public Artist Get(int id)
+        {
+            return db.Artists.Find(id);
+        }
+
+        private bool isDeviceOwner(Device device)
+        {
+            if (device.Owner == CurrentUser)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

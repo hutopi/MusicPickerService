@@ -4,11 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using MusicPickerService.Models;
 
 namespace MusicPickerService.Controllers
 {
+    [Authorize]
     public class AlbumsController : ApiController
     {
         private ApplicationDbContext db
@@ -16,26 +18,73 @@ namespace MusicPickerService.Controllers
             get { return Request.GetOwinContext().Get<ApplicationDbContext>(); }
         }
 
-        [HttpGet]
-        public IEnumerable<Album> GetByDevice(int device)
+        private ApplicationUserManager UserManager
         {
-            return (from d in db.DeviceTracks
+            get
+            {
+                return Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+        }
+
+        private ApplicationUser CurrentUser
+        {
+            get
+            {
+                return UserManager.FindById(User.Identity.GetUserId());
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetByDevice(int device)
+        {
+            Device currentDevice = db.Devices.Find(device);
+            if (currentDevice == null)
+            {
+                return NotFound();
+            }
+
+            if (!isDeviceOwner(currentDevice))
+            {
+                return Unauthorized();
+            }
+
+            return Ok((from d in db.DeviceTracks
                         where d.DeviceId == device
-                        select d.Track.Album).Distinct().ToList();
+                        select d.Track.Album).Distinct().ToList());
         }
 
         [HttpGet]
-        public IEnumerable<Album> GetByDeviceAndArtist(int device, int artist)
+        public IHttpActionResult GetByDeviceAndArtist(int device, int artist)
         {
-            return (from d in db.DeviceTracks
+            Device currentDevice = db.Devices.Find(device);
+            if (currentDevice == null)
+            {
+                return NotFound();
+            }
+
+            if (!isDeviceOwner(currentDevice))
+            {
+                return Unauthorized();
+            }
+
+            return Ok((from d in db.DeviceTracks
                     where d.DeviceId == device && d.Track.Album.ArtistId == artist
-                    select d.Track.Album).Distinct().ToList();
+                    select d.Track.Album).Distinct().ToList());
         }
 
         [HttpGet]
-        public string Get(int id)
+        public Album Get(int id)
         {
-            return "value";
+            return db.Albums.Find(id);
+        }
+
+        private bool isDeviceOwner(Device device)
+        {
+            if (device.Owner == CurrentUser)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
