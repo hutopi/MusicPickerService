@@ -14,6 +14,7 @@ namespace MusicPickerService
         {
             ConfigureDbContext(app);
             ConfigureAuth(app);
+            ConfigureSignalr(app);
         }
     }
 }
