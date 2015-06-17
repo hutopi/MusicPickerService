@@ -4,10 +4,11 @@ using System.Linq;
 using System.Web;
 using MusicPickerService.Models;
 using StackExchange.Redis;
+using Microsoft.AspNet.SignalR;
 
 namespace MusicPickerService.Hubs
 {
-    public class MusicHub
+    public class MusicHub: Hub
     {
         private static ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost");
         private ApplicationDbContext dbContext = new ApplicationDbContext();
@@ -47,7 +48,7 @@ namespace MusicPickerService.Hubs
             
         }
 
-        public void Stop(int deviceId)
+        public void Next(int deviceId)
         {
             
         }
