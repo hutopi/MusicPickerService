@@ -140,6 +140,26 @@ namespace MusicPickerService.Controllers
             foreach (DeviceSubmission submission in submissions)
             {
                 Artist artist;
+                if (submission.Artist == null)
+                {
+                    submission.Artist = "Unknown artist";
+                }
+                if (submission.Album == null)
+                {
+                    submission.Album = "Unknown album";
+                }
+                if (submission.Title == null)
+                {
+                    if (submission.Count != 0)
+                    {
+                        submission.Title = String.Format("Track {0}", submission.Count);
+                    }
+                    else
+                    {
+                        submission.Title = "Unknown track";
+                    }
+                }
+
                 if (db.Artists.Count(a => a.Name == submission.Artist) == 0)
                 {
                     artist = new Artist() {Name = submission.Artist};
