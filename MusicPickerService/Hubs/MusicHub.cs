@@ -104,6 +104,8 @@ namespace MusicPickerService.Hubs
 
             string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
             Clients.Client(deviceClientId).SetTrackId(current);
+
+            Play(deviceId);
         }
 
         public void GetState(int deviceId)
