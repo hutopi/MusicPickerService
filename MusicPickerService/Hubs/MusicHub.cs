@@ -38,6 +38,13 @@ namespace MusicPickerService.Hubs
             }
 
             SendClientState(deviceId);
+
+            int current = (int)Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
+            string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
+
+            string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
+            Clients.Client(deviceClientId).Stop();
+            Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
         }
 
         public void RegisterDevice(int deviceId)
@@ -96,8 +103,24 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).Pause();
         }
 
+        public void RequestNext(int deviceId)
+        {
+            Store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), false);
+            Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
+
+            SendClientState(deviceId);
+
+            string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
+            Clients.Client(deviceClientId).Stop();
+        }
+
         public void Next(int deviceId)
         {
+            if (Store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) == 0)
+            {
+                return;
+            }
+
             int current = (int) Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
             string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
             Store.StringSet(String.Format("musichub.device.{0}.current", deviceId), current);
