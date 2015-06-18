@@ -96,16 +96,19 @@ namespace MusicPickerService.Hubs
 
         public void Next(int deviceId)
         {
-            Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
-            int current = (int)Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
+            int current = (int) Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
+            string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
             Store.StringSet(String.Format("musichub.device.{0}.current", deviceId), current);
-            
+
             SendClientState(deviceId);
 
-            string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
-            Clients.Client(deviceClientId).SetTrackId(current);
+            if (currentDeviceTrack != null)
+            {
+                string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
+                Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
 
-            Play(deviceId);
+                Play(deviceId);
+            }
         }
 
         public void GetState(int deviceId)
