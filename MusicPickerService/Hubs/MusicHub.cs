@@ -43,6 +43,7 @@ namespace MusicPickerService.Hubs
         public void RegisterDevice(int deviceId)
         {
             Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
             Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
             Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
             Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
@@ -55,6 +56,7 @@ namespace MusicPickerService.Hubs
             return new DeviceState()
             {
                 Current = (int) Store.StringGet(String.Format("musichub.device.{0}.current", deviceId)),
+                Duration = (int)Store.StringGet(String.Format("musichub.device.{0}.duration", deviceId)),
                 Playing = (bool) Store.StringGet(String.Format("musichub.device.{0}.playing", deviceId)),
                 LastPause = DateTime.FromFileTimeUtc((long) Store.StringGet(String.Format("musichub.device.{0}.lastpause", deviceId))),
                 Queue = (int[]) Array.ConvertAll(Store.ListRange(String.Format("musichub.device.{0}.queue", deviceId)), item => (int) item)
@@ -99,6 +101,11 @@ namespace MusicPickerService.Hubs
             int current = (int) Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
             string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
             Store.StringSet(String.Format("musichub.device.{0}.current", deviceId), current);
+            
+            int duration = (from dt in this.dbContext.DeviceTracks
+                                    where dt.DeviceId == deviceId && dt.TrackId == current
+                                    select dt.TrackDuration).First();
+            Store.StringSet(String.Format("musichub.device.{0}.duration", deviceId), duration);
 
             SendClientState(deviceId);
 

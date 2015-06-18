@@ -12,5 +12,6 @@ namespace MusicPickerService.Models
         public int Year { get; set; }
         public int Number { get; set; }
         public uint Count { get; set; }
+        public int Duration { get; set; }
     }
 }

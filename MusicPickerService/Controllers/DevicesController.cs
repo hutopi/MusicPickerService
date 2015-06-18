@@ -212,7 +212,8 @@ namespace MusicPickerService.Controllers
                     {
                         DeviceId = id,
                         TrackId = track.Id,
-                        DeviceTrackId = submission.Id
+                        DeviceTrackId = submission.Id,
+                        TrackDuration = submission.Duration
                     };
                     db.DeviceTracks.Add(deviceTrack);
                     db.SaveChanges();

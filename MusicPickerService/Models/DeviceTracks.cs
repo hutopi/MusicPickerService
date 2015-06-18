@@ -17,5 +17,6 @@ namespace MusicPickerService.Models
         public virtual Track Track { get; set; }
 
         public string DeviceTrackId { get; set; }
+        public int TrackDuration { get; set; }
     }
 }
