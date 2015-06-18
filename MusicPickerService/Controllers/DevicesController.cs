@@ -69,6 +69,27 @@ namespace MusicPickerService.Controllers
             return Ok(device);
         }
 
+        // GET: api/Devices/name
+        [ResponseType(typeof(Device))]
+        public IHttpActionResult GetDevice(string name)
+        {
+            Device device = (from d in db.Devices
+                where d.Name == name
+                select d).SingleOrDefault();
+            
+            if (device == null)
+            {
+                return NotFound();
+            }
+
+            if (!isDeviceOwner(device))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(device);
+        }
+
         // POST: api/Devices
         [ResponseType(typeof(Device))]
         public IHttpActionResult PostDevice(DeviceBindingModel input)
