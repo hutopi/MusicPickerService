@@ -197,6 +197,10 @@
     <Compile Include="Migrations\201506181324221_TrackDurations.Designer.cs">
       <DependentUpon>201506181324221_TrackDurations.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201506191004365_MetaIndexes.cs" />
+    <Compile Include="Migrations\201506191004365_MetaIndexes.Designer.cs">
+      <DependentUpon>201506191004365_MetaIndexes.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\Album.cs" />
@@ -295,6 +299,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201506181324221_TrackDurations.resx">
       <DependentUpon>201506181324221_TrackDurations.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201506191004365_MetaIndexes.resx">
+      <DependentUpon>201506191004365_MetaIndexes.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

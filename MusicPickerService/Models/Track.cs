@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
 namespace MusicPickerService.Models
@@ -17,6 +18,8 @@ namespace MusicPickerService.Models
         
         [Required]
         [DataMember]
+        [Index("IX_NameAndAlbum", 1)]
+        [MaxLength(100)]
         public string Name { get; set; }
 
         [DataMember]
@@ -26,6 +29,7 @@ namespace MusicPickerService.Models
 
         [Required]
         [DataMember]
+        [Index("IX_NameAndAlbum", 2)]
         public int AlbumId { get; set; }
         public virtual Album Album { get; set; }
 

@@ -13,6 +13,7 @@ namespace MusicPickerService.Models
         public virtual Device Device { get; set; }
 
         [Key, Column(Order = 1)]
+        [Index]
         public int TrackId { get; set; }
         public virtual Track Track { get; set; }
 
