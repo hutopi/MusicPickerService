@@ -189,6 +189,7 @@
     <Compile Include="Controllers\ArtistsController.cs" />
     <Compile Include="Controllers\DevicesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\SubmitDevice.cs" />
     <Compile Include="Controllers\TracksController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -214,6 +215,10 @@
     <Compile Include="Migrations\201506191004365_MetaIndexes.cs" />
     <Compile Include="Migrations\201506191004365_MetaIndexes.Designer.cs">
       <DependentUpon>201506191004365_MetaIndexes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201506191647056_AlbumArtwork.cs" />
+    <Compile Include="Migrations\201506191647056_AlbumArtwork.Designer.cs">
+      <DependentUpon>201506191647056_AlbumArtwork.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -318,6 +323,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201506191004365_MetaIndexes.resx">
       <DependentUpon>201506191004365_MetaIndexes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201506191647056_AlbumArtwork.resx">
+      <DependentUpon>201506191647056_AlbumArtwork.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

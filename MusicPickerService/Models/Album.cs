@@ -33,6 +33,9 @@ namespace MusicPickerService.Models
         public int ArtistId { get; set; }
         public virtual Artist Artist { get; set; }
 
+        [DataMember]
+        public string Artwork { get; set; }
+
         public virtual ICollection<Track> Tracks { get; set; }
     }
 }
