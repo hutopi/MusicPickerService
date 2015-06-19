@@ -9,7 +9,7 @@ $.connection.hub.start();
 
 $('#connect').click(function(ev) {
     deviceId = $('#deviceId').val();
-    musicHubProxy.invoke('ConnectToDevice', deviceId);
+    musicHubProxy.invoke('RegisterClient', deviceId);
 }.bind(this));
 
 $('#queue').click(function(ev) {

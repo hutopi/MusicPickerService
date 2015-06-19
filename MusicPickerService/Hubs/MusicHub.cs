@@ -21,8 +21,52 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        public void RegisterDevice(int deviceId)
+        {
+            Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
+            Store.KeyDelete(String.Format("musichub.device.{0}.clients", deviceId));
+            Store.StringSet(String.Format("musichub.device.{0}.connection", deviceId), Context.ConnectionId);
+        }
+        private DeviceState CreateDeviceState(int deviceId)
+        {
+            return new DeviceState()
+            {
+                Current = (int)Store.StringGet(String.Format("musichub.device.{0}.current", deviceId)),
+                Duration = (int)Store.StringGet(String.Format("musichub.device.{0}.duration", deviceId)),
+                Playing = (bool)Store.StringGet(String.Format("musichub.device.{0}.playing", deviceId)),
+                LastPause = DateTime.FromFileTimeUtc((long)Store.StringGet(String.Format("musichub.device.{0}.lastpause", deviceId))),
+                Queue = (int[])Array.ConvertAll(Store.ListRange(String.Format("musichub.device.{0}.queue", deviceId)), item => (int)item)
+            };
+        }
+
+        public void RegisterClient(int deviceId)
+        {
+            Groups.Add(Context.ConnectionId, String.Format("device.{0}", deviceId));
+            Store.SetAdd(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
+        }
+
+        public bool IsRegistered(int deviceId)
+        {
+            if (Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId)) == Context.ConnectionId)
+            {
+                return true;
+            }
+
+            return Store.SetContains(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
+        }
+
         public void Queue(int deviceId, int[] trackIds)
         {
+            if (!IsRegistered(deviceId))
+            {
+                return;
+            }
+
             string queue = String.Format("musichub.device.{0}.queue", deviceId);
             string deviceQueue = String.Format("musichub.device.{0}.queue.device", deviceId);
             Store.KeyDelete(queue);
@@ -47,27 +91,14 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
         }
 
-        public void RegisterDevice(int deviceId)
+        public void GetState(int deviceId)
         {
-            Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
-            Store.StringSet(String.Format("musichub.device.{0}.connection", deviceId), Context.ConnectionId);
-        }
-
-        private DeviceState CreateDeviceState(int deviceId)
-        {
-            return new DeviceState()
+            if (!IsRegistered(deviceId))
             {
-                Current = (int) Store.StringGet(String.Format("musichub.device.{0}.current", deviceId)),
-                Duration = (int)Store.StringGet(String.Format("musichub.device.{0}.duration", deviceId)),
-                Playing = (bool) Store.StringGet(String.Format("musichub.device.{0}.playing", deviceId)),
-                LastPause = DateTime.FromFileTimeUtc((long) Store.StringGet(String.Format("musichub.device.{0}.lastpause", deviceId))),
-                Queue = (int[]) Array.ConvertAll(Store.ListRange(String.Format("musichub.device.{0}.queue", deviceId)), item => (int) item)
-            };
+                return;
+            }
+
+            Clients.Caller.SetState(CreateDeviceState(deviceId));
         }
 
         public void SendClientState(int deviceId)
@@ -75,14 +106,13 @@ namespace MusicPickerService.Hubs
             Clients.Group(String.Format("device.{0}", deviceId)).SetState(CreateDeviceState(deviceId));
         }
 
-        // Called by app to request a device to control
-        public void ConnectToDevice(int deviceId)
-        {
-            Groups.Add(Context.ConnectionId, String.Format("device.{0}", deviceId));
-        }
-
         public void Play(int deviceId)
         {
+            if (!IsRegistered(deviceId))
+            {
+                return;
+            }
+
             Store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), true);
             Store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
 
@@ -94,6 +124,11 @@ namespace MusicPickerService.Hubs
 
         public void Pause(int deviceId)
         {
+            if (!IsRegistered(deviceId))
+            {
+                return;
+            }
+
             Store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), false);
             Store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
 
@@ -105,6 +140,11 @@ namespace MusicPickerService.Hubs
 
         public void RequestNext(int deviceId)
         {
+            if (!IsRegistered(deviceId))
+            {
+                return;
+            }
+
             Store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), false);
             Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
 
@@ -116,6 +156,11 @@ namespace MusicPickerService.Hubs
 
         public void Next(int deviceId)
         {
+            if (!IsRegistered(deviceId))
+            {
+                return;
+            }
+
             if (Store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) == 0)
             {
                 return;
@@ -139,11 +184,6 @@ namespace MusicPickerService.Hubs
 
                 Play(deviceId);
             }
-        }
-
-        public void GetState(int deviceId)
-        {
-            Clients.Caller.SetState(CreateDeviceState(deviceId));
         }
     }
 }
