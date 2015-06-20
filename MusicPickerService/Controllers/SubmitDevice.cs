@@ -32,18 +32,24 @@ namespace MusicPickerService.Controllers
             if (result.IsSuccessStatusCode)
             {
                 JObject search = JObject.Parse(result.Content.ReadAsStringAsync().Result);
-                List<JToken> results = search["album"]["image"].Children().ToList();
-                if (results.Count > 0)
+                if (search["album"] != null)
                 {
-                    string url = results[results.Count - 1]["#text"].ToString();
-    
-                    Album album = (from a in db.Albums
-                        where a.Name == submission.Album
-                        select a).First();
+                    if (search["album"]["image"] != null)
+                    {
+                        List<JToken> results = search["album"]["image"].Children().ToList();
+                        if (results.Count > 0)
+                        {
+                            string url = results[results.Count - 1]["#text"].ToString();
 
-                    album.Artwork = url;
-                    db.Albums.AddOrUpdate(album);
-                    db.SaveChanges();
+                            Album album = (from a in db.Albums
+                                           where a.Name == submission.Album
+                                           select a).First();
+
+                            album.Artwork = url;
+                            db.Albums.AddOrUpdate(album);
+                            db.SaveChanges();
+                        }
+                    }
                 }
             }
         }
