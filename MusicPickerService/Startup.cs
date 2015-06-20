@@ -14,8 +14,8 @@ namespace MusicPickerService
         {
             ConfigureHangfire(app);
             ConfigureDbContext(app);
-            ConfigureSignalr(app);
             ConfigureAuth(app);
+            ConfigureSignalr(app);
         }
     }
 }

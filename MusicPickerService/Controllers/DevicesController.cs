@@ -159,7 +159,6 @@ namespace MusicPickerService.Controllers
                 return Unauthorized();
             }
 
-            BackgroundJob.Enqueue<SubmitDevice>(x => x.EraseDatabase(id));
             BackgroundJob.Enqueue<SubmitDevice>(x => x.Submit(JobCancellationToken.Null, id, submissions));
 
             return Ok();

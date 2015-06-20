@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.Infrastructure;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
 using MusicPickerService.Providers;
@@ -12,6 +14,21 @@ using MusicPickerService.Models;
 
 namespace MusicPickerService
 {
+    public class QueryStringOAuthBearerProvider : OAuthBearerAuthenticationProvider
+    {
+        public override Task RequestToken(OAuthRequestTokenContext context)
+        {
+            var value = context.Request.Query.Get("access_token");
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                context.Token = value;
+            }
+
+            return Task.FromResult<object>(null);
+        }
+    }
+
     public partial class Startup
     {
         public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
@@ -40,7 +57,30 @@ namespace MusicPickerService
             };
 
             // Enable the application to use bearer tokens to authenticate users
-            app.UseOAuthBearerTokens(OAuthOptions);
+            app.UseOAuthAuthorizationServer(OAuthOptions);
+
+            var OAuthBearerOptions = new OAuthBearerAuthenticationOptions()
+            {
+                Provider = new QueryStringOAuthBearerProvider(),
+                AccessTokenProvider = new AuthenticationTokenProvider()
+                {
+                    OnCreate = create,
+                    OnReceive = receive
+                },
+            };
+
+            app.UseOAuthBearerAuthentication(OAuthBearerOptions);
         }
+
+        public static Action<AuthenticationTokenCreateContext> create = new Action<AuthenticationTokenCreateContext>(c =>
+        {
+            c.SetToken(c.SerializeTicket());
+        });
+
+        public static Action<AuthenticationTokenReceiveContext> receive = new Action<AuthenticationTokenReceiveContext>(c =>
+        {
+            c.DeserializeTicket(c.Token);
+            c.OwinContext.Environment["Properties"] = c.Ticket.Properties;
+        });
     }
 }

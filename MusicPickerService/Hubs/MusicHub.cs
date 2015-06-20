@@ -2,6 +2,8 @@
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using MusicPickerService.Models;
 using StackExchange.Redis;
 using Microsoft.AspNet.SignalR;
@@ -21,8 +23,23 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        private ApplicationUserManager UserManager
+        {
+            get
+            {
+                return HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+        }
+
+        [Authorize]
         public void RegisterDevice(int deviceId)
         {
+            Device device = dbContext.Devices.Find(deviceId);
+            if (device.OwnerId != Context.User.Identity.GetUserId())
+            {
+                return;
+            }
+
             Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
             Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
             Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
@@ -35,6 +52,12 @@ namespace MusicPickerService.Hubs
 
         public void RegisterClient(int deviceId)
         {
+            Device device = dbContext.Devices.Find(deviceId);
+            if (device.OwnerId != Context.User.Identity.GetUserId())
+            {
+                return;
+            }
+
             Groups.Add(Context.ConnectionId, String.Format("device.{0}", deviceId));
             Store.SetAdd(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
         }

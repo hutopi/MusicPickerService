@@ -22,12 +22,6 @@ namespace MusicPickerService.Controllers
             this.db = new ApplicationDbContext();
         }
 
-        public void EraseDatabase(int deviceId)
-        {
-            db.DeviceTracks.RemoveRange(db.DeviceTracks.Where(e => e.DeviceId == deviceId));
-            db.SaveChanges();
-        }
-
         public void GetArtwork(DeviceSubmission submission)
         {
             string key = "2c2e6ce34b0d78dac557611b898bf547";
@@ -56,6 +50,9 @@ namespace MusicPickerService.Controllers
 
         public void Submit(IJobCancellationToken cancellationToken, int id, List<DeviceSubmission> submissions)
         {
+            db.DeviceTracks.RemoveRange(db.DeviceTracks.Where(e => e.DeviceId == id));
+            db.SaveChanges();
+
             foreach (DeviceSubmission submission in submissions)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -137,7 +134,7 @@ namespace MusicPickerService.Controllers
 
                 db.SaveChanges();
 
-                BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
+                // BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
             }
         }
     }

@@ -5,11 +5,13 @@ musicHubProxy.client.setState = function (deviceState) {
     console.log(deviceState);
 }
 
-$.connection.hub.start();
-
 $('#connect').click(function(ev) {
     deviceId = $('#deviceId').val();
-    musicHubProxy.invoke('RegisterClient', deviceId);
+    $.connection.hub.qs = { 'access_token': $('#bearer').val() };
+    $.connection.hub.start().done(function () {
+        console.log("COUCOU");
+        musicHubProxy.invoke('RegisterClient', deviceId);
+    });
 }.bind(this));
 
 $('#queue').click(function(ev) {
