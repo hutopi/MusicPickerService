@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
@@ -40,13 +42,7 @@ namespace MusicPickerService.Hubs
                 return;
             }
 
-            Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
-            Store.KeyDelete(String.Format("musichub.device.{0}.clients", deviceId));
+            Store.StringSet(String.Format("musichub.devices.{0}", Context.ConnectionId), deviceId);
             Store.StringSet(String.Format("musichub.device.{0}.connection", deviceId), Context.ConnectionId);
         }
 
@@ -58,8 +54,38 @@ namespace MusicPickerService.Hubs
                 return;
             }
 
+            Store.SetAdd(String.Format("musichub.client.{0}.devices", Context.ConnectionId), deviceId);
             Groups.Add(Context.ConnectionId, String.Format("device.{0}", deviceId));
             Store.SetAdd(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
+        }
+
+        public override Task OnDisconnected(bool stopCalled)
+        {
+            string deviceId;
+            deviceId = Store.StringGet(String.Format("musichub.devices.{0}", Context.ConnectionId));
+
+            if (deviceId != null)
+            {
+                Store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.clients", deviceId));
+            }
+            else
+            {
+                RedisValue[] members = Store.SetMembers(String.Format("musichub.client.{0}.devices", Context.ConnectionId));
+                foreach (string member in members)
+                {
+                    Store.SetRemove(String.Format("musichub.client.{0}.devices", Context.ConnectionId), member);
+                    Groups.Remove(Context.ConnectionId, String.Format("device.{0}", member));
+                    Store.SetRemove(String.Format("musichub.device.{0}.clients", member), Context.ConnectionId);
+                }
+            }
+
+            return base.OnDisconnected(stopCalled);
         }
 
         private DeviceState CreateDeviceState(int deviceId)
