@@ -196,6 +196,7 @@
     </Compile>
     <Compile Include="Hubs\DeviceState.cs" />
     <Compile Include="Hubs\MusicHub.cs" />
+    <Compile Include="Hubs\VoteOption.cs" />
     <Compile Include="Migrations\201506142156169_InitialCreate.cs" />
     <Compile Include="Migrations\201506142156169_InitialCreate.Designer.cs">
       <DependentUpon>201506142156169_InitialCreate.cs</DependentUpon>

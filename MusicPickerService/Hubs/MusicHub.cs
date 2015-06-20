@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
@@ -46,6 +48,7 @@ namespace MusicPickerService.Hubs
             Store.StringSet(String.Format("musichub.device.{0}.connection", deviceId), Context.ConnectionId);
         }
 
+        [Authorize]
         public void RegisterClient(int deviceId)
         {
             Device device = dbContext.Devices.Find(deviceId);
@@ -181,13 +184,22 @@ namespace MusicPickerService.Hubs
                 return;
             }
 
+            bool sendTrack = (int) Store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) == 0;
+            QueueVote(deviceId);
+
             Store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), true);
             Store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
 
-            SendClientState(deviceId);
-
             string deviceClientId = Store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
+
+            if (sendTrack && Store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) > 0)
+            {
+                Clients.Client(deviceClientId).Stop();
+                string currentDeviceTrack = UpdateState(deviceId);
+                Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
+            }
             Clients.Client(deviceClientId).Play();
+            SendClientState(deviceId);
         }
 
         public void Pause(int deviceId)
@@ -226,6 +238,19 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).Stop();
         }
 
+        private string UpdateState(int deviceId)
+        {
+            int current = (int) Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
+            string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
+            Store.StringSet(String.Format("musichub.device.{0}.current", deviceId), current);
+            
+            int duration = (from dt in this.dbContext.DeviceTracks
+                                    where dt.DeviceId == deviceId && dt.TrackId == current
+                                    select dt.TrackDuration).First();
+            Store.StringSet(String.Format("musichub.device.{0}.duration", deviceId), duration);
+            return currentDeviceTrack;
+        }
+
         public void Next(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -235,19 +260,14 @@ namespace MusicPickerService.Hubs
                 return;
             }
 
+            QueueVote(deviceId);
+            
             if (Store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) == 0)
             {
                 return;
             }
 
-            int current = (int) Store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
-            string currentDeviceTrack = Store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
-            Store.StringSet(String.Format("musichub.device.{0}.current", deviceId), current);
-            
-            int duration = (from dt in this.dbContext.DeviceTracks
-                                    where dt.DeviceId == deviceId && dt.TrackId == current
-                                    select dt.TrackDuration).First();
-            Store.StringSet(String.Format("musichub.device.{0}.duration", deviceId), duration);
+            string currentDeviceTrack = UpdateState(deviceId);
 
             SendClientState(deviceId);
 
@@ -258,6 +278,92 @@ namespace MusicPickerService.Hubs
 
                 Play(deviceId);
             }
+        }
+
+        private void SendVoteOptions(int deviceId)
+        {
+            List<VoteOption> votes = new List<VoteOption>();
+
+            IEnumerable<RedisKey> keys = redis.GetServer(redis.GetEndPoints()[0]).Keys(0, String.Format("musichub.device.{0}.vote.*", deviceId));
+            foreach (RedisKey key in keys)
+            {
+                votes.Add(new VoteOption()
+                {
+                    TrackId = (int) Store.HashGet(key, "track"),
+                    Votes = (int) Store.HashGet(key, "votes")
+                });
+            }
+            Clients.Group(String.Format("device.{0}", deviceId)).SetVoteOptions(votes);
+        }
+
+        private void QueueVote(int deviceId)
+        {
+            IEnumerable<RedisKey> keys = redis.GetServer(redis.GetEndPoints()[0]).Keys(0, String.Format("musichub.device.{0}.vote.*", deviceId));
+            int track = -1;
+            int maxVotes = -1;
+
+            foreach (RedisKey key in keys)
+            {
+                int votes = (int) Store.HashGet(key, "votes");
+                if (votes > maxVotes)
+                {
+                    maxVotes = votes;
+                    track = (int) Store.HashGet(key, "track");
+                }
+            }
+
+            if (track != -1)
+            {
+                Store.ListRightPush(String.Format("musichub.device.{0}.queue", deviceId), track);
+                string trackDeviceId = (from dt in this.dbContext.DeviceTracks
+                                        where dt.DeviceId == deviceId && dt.TrackId == track
+                                        select dt.DeviceTrackId).First();
+                Store.ListRightPush(String.Format("musichub.device.{0}.queue.device", deviceId), trackDeviceId);
+            }
+            
+            ResetVote(deviceId);
+        }
+
+        private void ResetVote(int deviceId)
+        {
+            IEnumerable<RedisKey> keys = redis.GetServer(redis.GetEndPoints()[0]).Keys(0, String.Format("musichub.device.{0}.vote.*", deviceId));
+            foreach (RedisKey key in keys)
+            {
+                Store.KeyDelete(key);
+            }
+        }
+
+        public void SubmitVoteOptions(int deviceId, int[] trackIds)
+        {
+            if (!IsRegistered(deviceId)
+               ||
+               !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
+            {
+                return;
+            }
+
+            ResetVote(deviceId);
+
+            foreach (int trackId in trackIds) 
+            {
+                Store.HashSet(String.Format("musichub.device.{0}.vote.{1}", deviceId, trackId), "track", trackId);
+                Store.HashSet(String.Format("musichub.device.{0}.vote.{1}", deviceId, trackId), "votes", 0);
+            }
+
+            SendVoteOptions(deviceId);
+        }
+
+        public void VoteForTrack(int deviceId, int trackId)
+        {
+            if (!IsRegistered(deviceId)
+               ||
+               !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
+            {
+                return;
+            }
+
+            Store.HashIncrement(String.Format("musichub.device.{0}.vote.{1}", deviceId, trackId), "votes");
+            SendVoteOptions(deviceId);
         }
     }
 }

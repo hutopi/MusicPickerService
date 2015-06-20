@@ -134,7 +134,7 @@ namespace MusicPickerService.Controllers
 
                 db.SaveChanges();
 
-                // BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
+                BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
             }
         }
     }
