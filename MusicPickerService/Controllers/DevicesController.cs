@@ -19,7 +19,6 @@ using Hangfire;
 
 namespace MusicPickerService.Controllers
 {
-   
     [Authorize]
     [RoutePrefix("api/Devices")]
     public class DevicesController : ApiController
