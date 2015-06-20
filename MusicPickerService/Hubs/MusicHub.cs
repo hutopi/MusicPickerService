@@ -59,6 +59,11 @@ namespace MusicPickerService.Hubs
             Store.SetAdd(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
         }
 
+        public bool DeviceConnected(int deviceId)
+        {
+            return Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId));
+        }
+
         public override Task OnDisconnected(bool stopCalled)
         {
             string deviceId;
@@ -73,6 +78,7 @@ namespace MusicPickerService.Hubs
                 Store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
                 Store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
                 Store.KeyDelete(String.Format("musichub.device.{0}.clients", deviceId));
+                Store.KeyDelete(String.Format("musichub.device.{0}.connection", deviceId));
             }
             else
             {
@@ -116,7 +122,9 @@ namespace MusicPickerService.Hubs
 
         public void Queue(int deviceId, int[] trackIds)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId) 
+                || 
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
@@ -128,11 +136,18 @@ namespace MusicPickerService.Hubs
 
             foreach (int trackId in trackIds)
             {
-                Store.ListRightPush(queue, trackId);
-                string trackDeviceId = (from dt in this.dbContext.DeviceTracks
-                    where dt.DeviceId == deviceId && dt.TrackId == trackId
-                    select dt.DeviceTrackId).First();
-                Store.ListRightPush(deviceQueue, trackDeviceId);
+                try
+                {
+                    string trackDeviceId = (from dt in this.dbContext.DeviceTracks
+                        where dt.DeviceId == deviceId && dt.TrackId == trackId
+                        select dt.DeviceTrackId).First();
+                    Store.ListRightPush(queue, trackId);
+                    Store.ListRightPush(deviceQueue, trackDeviceId);
+                }
+                catch
+                {
+                    continue;
+                }
             }
 
             SendClientState(deviceId);
@@ -147,7 +162,9 @@ namespace MusicPickerService.Hubs
 
         public void GetState(int deviceId)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId)
+                ||
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
@@ -157,7 +174,9 @@ namespace MusicPickerService.Hubs
 
         public void Play(int deviceId)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId)
+                ||
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
@@ -173,7 +192,9 @@ namespace MusicPickerService.Hubs
 
         public void Pause(int deviceId)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId)
+                ||
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
@@ -189,7 +210,9 @@ namespace MusicPickerService.Hubs
 
         public void RequestNext(int deviceId)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId)
+                ||
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
@@ -205,7 +228,9 @@ namespace MusicPickerService.Hubs
 
         public void Next(int deviceId)
         {
-            if (!IsRegistered(deviceId))
+            if (!IsRegistered(deviceId)
+                ||
+                !Store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId)))
             {
                 return;
             }
