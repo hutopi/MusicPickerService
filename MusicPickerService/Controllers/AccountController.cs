@@ -1,4 +1,18 @@
-﻿using System.Net.Http;
+﻿// ***********************************************************************
+// Assembly         : MusicPickerService
+// Author           : Pierre
+// Created          : 06-12-2015
+//
+// Last Modified By : Pierre
+// Last Modified On : 06-21-2015
+// ***********************************************************************
+// <copyright file="AccountController.cs" company="Hutopi">
+//     Copyright ©  2015 Hugo Caille, Pierre Defache & Thomas Fossati.
+//     Music Picker is released upon the terms of the Apache 2.0 License.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.Identity;
@@ -7,19 +21,39 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using MusicPickerService.Models;
 
+/// <summary>
+/// The Controllers namespace.
+/// </summary>
 namespace MusicPickerService.Controllers
 {
+    /// <summary>
+    /// Class AccountController
+    /// </summary>
     [Authorize]
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
     {
+        /// <summary>
+        /// The local login provider
+        /// </summary>
         private const string LocalLoginProvider = "Local";
+        /// <summary>
+        /// The user manager
+        /// </summary>
         private ApplicationUserManager _userManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccountController"/> class.
+        /// </summary>
         public AccountController()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccountController"/> class.
+        /// </summary>
+        /// <param name="userManager">The user manager.</param>
+        /// <param name="accessTokenFormat">The access token format.</param>
         public AccountController(ApplicationUserManager userManager,
             ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
         {
@@ -27,6 +61,10 @@ namespace MusicPickerService.Controllers
             AccessTokenFormat = accessTokenFormat;
         }
 
+        /// <summary>
+        /// Gets the user manager.
+        /// </summary>
+        /// <value>The user manager.</value>
         public ApplicationUserManager UserManager
         {
             get
@@ -39,9 +77,17 @@ namespace MusicPickerService.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the access token format.
+        /// </summary>
+        /// <value>The access token format.</value>
         public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
         // POST api/Account/Logout
+        /// <summary>
+        /// Logouts this instance.
+        /// </summary>
+        /// <returns>IHttpActionResult.</returns>
         [Route("Logout")]
         public IHttpActionResult Logout()
         {
@@ -50,6 +96,11 @@ namespace MusicPickerService.Controllers
         }
 
         // POST api/Account/ChangePassword
+        /// <summary>
+        /// Changes the password.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>Task&lt;IHttpActionResult&gt;.</returns>
         [Route("ChangePassword")]
         public async Task<IHttpActionResult> ChangePassword(ChangePasswordBindingModel model)
         {
@@ -70,6 +121,11 @@ namespace MusicPickerService.Controllers
         }
 
         // POST api/Account/SetPassword
+        /// <summary>
+        /// Sets the password.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>Task&lt;IHttpActionResult&gt;.</returns>
         [Route("SetPassword")]
         public async Task<IHttpActionResult> SetPassword(SetPasswordBindingModel model)
         {
@@ -89,6 +145,11 @@ namespace MusicPickerService.Controllers
         }
 
         // POST api/Account/Register
+        /// <summary>
+        /// Registers the specified model.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>Task&lt;IHttpActionResult&gt;.</returns>
         [AllowAnonymous]
         [Route("Register")]
         public async Task<IHttpActionResult> Register(RegisterBindingModel model)
@@ -110,6 +171,10 @@ namespace MusicPickerService.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources that are used by the object and, optionally, releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && _userManager != null)
@@ -123,11 +188,20 @@ namespace MusicPickerService.Controllers
 
         #region Helpers
 
+        /// <summary>
+        /// Gets the authentication.
+        /// </summary>
+        /// <value>The authentication.</value>
         private IAuthenticationManager Authentication
         {
             get { return Request.GetOwinContext().Authentication; }
         }
 
+        /// <summary>
+        /// Gets the error result.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>IHttpActionResult.</returns>
         private IHttpActionResult GetErrorResult(IdentityResult result)
         {
             if (result == null)

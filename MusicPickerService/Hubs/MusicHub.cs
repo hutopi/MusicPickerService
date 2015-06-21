@@ -1,4 +1,18 @@
-﻿using System;
+﻿// ***********************************************************************
+// Assembly         : MusicPickerService
+// Author           : Pierre
+// Created          : 06-15-2015
+//
+// Last Modified By : Pierre
+// Last Modified On : 06-21-2015
+// ***********************************************************************
+// <copyright file="MusicHub.cs" company="Hutopi">
+//     Copyright ©  2015 Hugo Caille, Pierre Defache & Thomas Fossati.
+//     Music Picker is released upon the terms of the Apache 2.0 License.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,13 +23,29 @@ using MusicPickerService.Models;
 using StackExchange.Redis;
 using Microsoft.AspNet.SignalR;
 
+/// <summary>
+/// The Hubs namespace.
+/// </summary>
 namespace MusicPickerService.Hubs
 {
+    /// <summary>
+    /// Class MusicHub.
+    /// </summary>
     public class MusicHub : Hub
     {
+        /// <summary>
+        /// The redis connection
+        /// </summary>
         private static ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost");
+        /// <summary>
+        /// The database context
+        /// </summary>
         private ApplicationDbContext dbContext = new ApplicationDbContext();
 
+        /// <summary>
+        /// Gets the store (database).
+        /// </summary>
+        /// <value>The store.</value>
         private IDatabase store
         {
             get
@@ -24,6 +54,10 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        /// <summary>
+        /// Gets the user manager.
+        /// </summary>
+        /// <value>The user manager.</value>
         private ApplicationUserManager userManager
         {
             get
@@ -32,6 +66,10 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        /// <summary>
+        /// Registers the device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         [Authorize]
         public void RegisterDevice(int deviceId)
         {
@@ -45,6 +83,10 @@ namespace MusicPickerService.Hubs
             store.StringSet(String.Format("musichub.device.{0}.connection", deviceId), Context.ConnectionId);
         }
 
+        /// <summary>
+        /// Registers the client.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         [Authorize]
         public void RegisterClient(int deviceId)
         {
@@ -59,11 +101,24 @@ namespace MusicPickerService.Hubs
             store.SetAdd(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
         }
 
+        /// <summary>
+        /// Return if the device is connected or not
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
         public bool DeviceConnected(int deviceId)
         {
             return store.KeyExists(String.Format("musichub.device.{0}.connection", deviceId));
         }
 
+        /// <summary>
+        /// Called when a connection disconnects from this hub gracefully or due to a timeout.
+        /// </summary>
+        /// <param name="stopCalled">true, if stop was called on the client closing the connection gracefully;
+        /// false, if the connection has been lost for longer than the
+        /// <see cref="P:Microsoft.AspNet.SignalR.Configuration.IConfigurationManager.DisconnectTimeout" />.
+        /// Timeouts can be caused by clients reconnecting to another SignalR server in scaleout.</param>
+        /// <returns>A <see cref="T:System.Threading.Tasks.Task" /></returns>
         public override Task OnDisconnected(bool stopCalled)
         {
             string deviceId;
@@ -94,6 +149,11 @@ namespace MusicPickerService.Hubs
             return base.OnDisconnected(stopCalled);
         }
 
+        /// <summary>
+        /// Creates the state of the device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <returns>DeviceState.</returns>
         private DeviceState CreateDeviceState(int deviceId)
         {
             return new DeviceState()
@@ -105,11 +165,20 @@ namespace MusicPickerService.Hubs
                 Queue = (int[])Array.ConvertAll(store.ListRange(String.Format("musichub.device.{0}.queue", deviceId)), item => (int)item)
             };
         }
+        /// <summary>
+        /// Sends the state of the client.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         private void SendClientState(int deviceId)
         {
             Clients.Group(String.Format("device.{0}", deviceId)).SetState(CreateDeviceState(deviceId));
         }
 
+        /// <summary>
+        /// Determines whether the specified device identifier is registered.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <returns><c>true</c> if the specified device identifier is registered; otherwise, <c>false</c>.</returns>
         private bool IsRegistered(int deviceId)
         {
             if (store.StringGet(String.Format("musichub.device.{0}.connection", deviceId)) == Context.ConnectionId)
@@ -120,6 +189,11 @@ namespace MusicPickerService.Hubs
             return store.SetContains(String.Format("musichub.device.{0}.clients", deviceId), Context.ConnectionId);
         }
 
+        /// <summary>
+        /// Queues the specified tracks on the device which has deviceId as id.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <param name="trackIds">The track ids.</param>
         public void Queue(int deviceId, int[] trackIds)
         {
             if (!IsRegistered(deviceId)
@@ -160,6 +234,10 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
         }
 
+        /// <summary>
+        /// Gets the state of the device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         public void GetState(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -172,6 +250,10 @@ namespace MusicPickerService.Hubs
             Clients.Caller.SetState(CreateDeviceState(deviceId));
         }
 
+        /// <summary>
+        /// Plays the tracks on the specified device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         public void Play(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -199,6 +281,10 @@ namespace MusicPickerService.Hubs
             SendClientState(deviceId);
         }
 
+        /// <summary>
+        /// Pauses the musics on the specified device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         public void Pause(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -217,6 +303,10 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).Pause();
         }
 
+        /// <summary>
+        /// Requests the next song.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         public void RequestNext(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -235,6 +325,11 @@ namespace MusicPickerService.Hubs
             Clients.Client(deviceClientId).Stop();
         }
 
+        /// <summary>
+        /// Updates the state.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <returns>System.String.</returns>
         private string UpdateState(int deviceId)
         {
             int current = (int)store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
@@ -248,6 +343,10 @@ namespace MusicPickerService.Hubs
             return currentDeviceTrack;
         }
 
+        /// <summary>
+        /// Play the next song on the specified device.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         public void Next(int deviceId)
         {
             if (!IsRegistered(deviceId)
@@ -277,6 +376,10 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        /// <summary>
+        /// Sends the vote options.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         private void SendVoteOptions(int deviceId)
         {
             List<VoteOption> votes = new List<VoteOption>();
@@ -293,6 +396,10 @@ namespace MusicPickerService.Hubs
             Clients.Group(String.Format("device.{0}", deviceId)).SetVoteOptions(votes);
         }
 
+        /// <summary>
+        /// Queues the vote.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         private void QueueVote(int deviceId)
         {
             IEnumerable<RedisKey> keys = redis.GetServer(redis.GetEndPoints()[0]).Keys(0, String.Format("musichub.device.{0}.vote.*", deviceId));
@@ -321,6 +428,10 @@ namespace MusicPickerService.Hubs
             ResetVote(deviceId);
         }
 
+        /// <summary>
+        /// Resets the vote.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
         private void ResetVote(int deviceId)
         {
             IEnumerable<RedisKey> keys = redis.GetServer(redis.GetEndPoints()[0]).Keys(0, String.Format("musichub.device.{0}.vote.*", deviceId));
@@ -330,6 +441,11 @@ namespace MusicPickerService.Hubs
             }
         }
 
+        /// <summary>
+        /// Submits the vote options.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <param name="trackIds">The track ids.</param>
         public void SubmitVoteOptions(int deviceId, int[] trackIds)
         {
             if (!IsRegistered(deviceId)
@@ -350,6 +466,11 @@ namespace MusicPickerService.Hubs
             SendVoteOptions(deviceId);
         }
 
+        /// <summary>
+        /// Votes for track.
+        /// </summary>
+        /// <param name="deviceId">The device identifier.</param>
+        /// <param name="trackId">The track identifier.</param>
         public void VoteForTrack(int deviceId, int trackId)
         {
             if (!IsRegistered(deviceId)
