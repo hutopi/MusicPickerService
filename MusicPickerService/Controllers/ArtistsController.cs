@@ -46,8 +46,8 @@ namespace MusicPickerService.Controllers
             }
 
             return Ok((from d in db.DeviceTracks
-                    where d.DeviceId == device
-                    select d.Track.Album.Artist).Distinct().ToList());
+                       where d.DeviceId == device
+                       select d.Track.Album.Artist).Distinct().ToList());
         }
 
         [HttpGet]

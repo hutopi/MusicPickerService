@@ -39,8 +39,8 @@ namespace MusicPickerService.Controllers
         public List<Device> GetDevices()
         {
             IQueryable<Device> result = from device in db.Devices
-                where device.OwnerId == currentUser.Id
-                select device;
+                                        where device.OwnerId == currentUser.Id
+                                        select device;
             List<Device> r = result.ToList();
 
             return r;
@@ -69,9 +69,9 @@ namespace MusicPickerService.Controllers
         public IHttpActionResult GetDevice(string name)
         {
             Device device = (from d in db.Devices
-                where d.Name == name
-                select d).SingleOrDefault();
-            
+                             where d.Name == name
+                             select d).SingleOrDefault();
+
             if (device == null)
             {
                 return NotFound();
@@ -173,8 +173,8 @@ namespace MusicPickerService.Controllers
         private bool DeviceExists(string ownerId, string deviceName)
         {
             int count = (from device in db.Devices
-                where device.OwnerId == ownerId && device.Name == deviceName
-                select device).Count();
+                         where device.OwnerId == ownerId && device.Name == deviceName
+                         select device).Count();
 
             if (count != 0)
             {

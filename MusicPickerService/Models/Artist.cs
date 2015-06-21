@@ -20,7 +20,7 @@ namespace MusicPickerService.Models
 
         [DataMember]
         public string MbId { get; set; }
-      
+
         public virtual ICollection<Album> Albums { get; set; }
     }
 }

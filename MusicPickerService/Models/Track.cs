@@ -11,7 +11,7 @@ namespace MusicPickerService.Models
         [Key]
         [DataMember]
         public int Id { get; set; }
-        
+
         [Required]
         [DataMember]
         [Index("IX_NameAndAlbum", 1)]

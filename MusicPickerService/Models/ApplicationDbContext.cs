@@ -20,6 +20,6 @@ namespace MusicPickerService.Models
         public DbSet<Album> Albums { get; set; }
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Genre> Genres { get; set; }
-        public DbSet<DeviceTracks> DeviceTracks { get; set; } 
+        public DbSet<DeviceTracks> DeviceTracks { get; set; }
     }
 }

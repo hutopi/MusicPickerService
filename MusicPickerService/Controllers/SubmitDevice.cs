@@ -49,8 +49,8 @@ namespace MusicPickerService.Controllers
                             }
                             catch (Exception e)
                             {
-                                
-                            }  
+
+                            }
                         }
                     }
                 }
@@ -147,9 +147,9 @@ namespace MusicPickerService.Controllers
                 }
                 catch (Exception e)
                 {
-                    
+
                 }
-                
+
 
                 BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
             }
