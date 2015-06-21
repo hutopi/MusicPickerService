@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MusicPickerService.Models
+﻿namespace MusicPickerService.Models
 {
     public class DeviceSubmission
     {

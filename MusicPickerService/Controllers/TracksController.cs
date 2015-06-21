@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using Microsoft.AspNet.Identity;
@@ -18,7 +15,7 @@ namespace MusicPickerService.Controllers
             get { return Request.GetOwinContext().Get<ApplicationDbContext>(); }
         }
 
-        private ApplicationUserManager UserManager
+        private ApplicationUserManager userManager
         {
             get
             {
@@ -26,11 +23,11 @@ namespace MusicPickerService.Controllers
             }
         }
 
-        private ApplicationUser CurrentUser
+        private ApplicationUser currentUser
         {
             get
             {
-                return UserManager.FindById(User.Identity.GetUserId());
+                return userManager.FindById(User.Identity.GetUserId());
             }
         }
 
@@ -43,7 +40,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(currentDevice))
+            if (!IsDeviceOwner(currentDevice))
             {
                 return Unauthorized();
             }
@@ -62,7 +59,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(currentDevice))
+            if (!IsDeviceOwner(currentDevice))
             {
                 return Unauthorized();
             }
@@ -78,9 +75,9 @@ namespace MusicPickerService.Controllers
             return db.Tracks.Find(id);
         }
 
-        private bool isDeviceOwner(Device device)
+        private bool IsDeviceOwner(Device device)
         {
-            if (device.Owner == CurrentUser)
+            if (device.Owner == currentUser)
             {
                 return true;
             }

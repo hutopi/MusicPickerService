@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Web.Hosting;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
 using MusicPickerService.Models;
 using Hangfire;
 
@@ -28,7 +20,7 @@ namespace MusicPickerService.Controllers
             get { return Request.GetOwinContext().Get<ApplicationDbContext>(); }
         }
 
-        private ApplicationUserManager UserManager
+        private ApplicationUserManager userManager
         {
             get
             {
@@ -36,18 +28,18 @@ namespace MusicPickerService.Controllers
             }
         }
 
-        private ApplicationUser CurrentUser
+        private ApplicationUser currentUser
         {
             get
             {
-                return UserManager.FindById(User.Identity.GetUserId());
+                return userManager.FindById(User.Identity.GetUserId());
             }
         }
 
         public List<Device> GetDevices()
         {
             IQueryable<Device> result = from device in db.Devices
-                where device.OwnerId == CurrentUser.Id
+                where device.OwnerId == currentUser.Id
                 select device;
             List<Device> r = result.ToList();
 
@@ -64,7 +56,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(device))
+            if (!IsDeviceOwner(device))
             {
                 return Unauthorized();
             }
@@ -85,7 +77,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(device))
+            if (!IsDeviceOwner(device))
             {
                 return Unauthorized();
             }
@@ -102,7 +94,7 @@ namespace MusicPickerService.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (DeviceExists(CurrentUser.Id, input.Name))
+            if (DeviceExists(currentUser.Id, input.Name))
             {
                 return BadRequest(String.Format("Device with name {0} already exists", input.Name));
             }
@@ -111,7 +103,7 @@ namespace MusicPickerService.Controllers
 
             Device device = new Device()
             {
-                Owner = CurrentUser,
+                Owner = currentUser,
                 Name = input.Name,
                 AccessDate = now,
                 RegistrationDate = now
@@ -133,7 +125,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(device))
+            if (!IsDeviceOwner(device))
             {
                 return Unauthorized();
             }
@@ -154,7 +146,7 @@ namespace MusicPickerService.Controllers
                 return NotFound();
             }
 
-            if (!isDeviceOwner(device))
+            if (!IsDeviceOwner(device))
             {
                 return Unauthorized();
             }
@@ -192,9 +184,9 @@ namespace MusicPickerService.Controllers
             return false;
         }
 
-        private bool isDeviceOwner(Device device)
+        private bool IsDeviceOwner(Device device)
         {
-            if (device.Owner == CurrentUser)
+            if (device.Owner == currentUser)
             {
                 return true;
             }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using MusicPickerService.Models;
+﻿using MusicPickerService.Models;
 using Owin;
 
 namespace MusicPickerService

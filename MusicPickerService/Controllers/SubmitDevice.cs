@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Hangfire;
 using MusicPickerService.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MusicPickerService.Controllers
@@ -41,13 +37,20 @@ namespace MusicPickerService.Controllers
                         {
                             string url = results[results.Count - 1]["#text"].ToString();
 
-                            Album album = (from a in db.Albums
-                                           where a.Name == submission.Album
-                                           select a).First();
+                            try
+                            {
+                                Album album = (from a in db.Albums
+                                               where a.Name == submission.Album
+                                               select a).First();
 
-                            album.Artwork = url;
-                            db.Albums.AddOrUpdate(album);
-                            db.SaveChanges();
+                                album.Artwork = url;
+                                db.Albums.AddOrUpdate(album);
+                                db.SaveChanges();
+                            }
+                            catch (Exception e)
+                            {
+                                
+                            }  
                         }
                     }
                 }
@@ -138,7 +141,15 @@ namespace MusicPickerService.Controllers
                     db.DeviceTracks.Add(deviceTrack);
                 }
 
-                db.SaveChanges();
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    
+                }
+                
 
                 BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
             }
