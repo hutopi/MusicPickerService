@@ -225,13 +225,15 @@ namespace MusicPickerService.Hubs
             }
 
             SendClientState(deviceId);
-
-            int current = (int)store.ListLeftPop(String.Format("musichub.device.{0}.queue", deviceId), 0);
-            string currentDeviceTrack = store.ListLeftPop(String.Format("musichub.device.{0}.queue.device", deviceId), 0);
-
-            string deviceClientId = store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
-            Clients.Client(deviceClientId).Stop();
-            Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
+            if ((bool) store.StringGet(String.Format("musichub.device.{0}.playing", deviceId)))
+            {
+                RequestNext(deviceId);
+            }
+            else
+            {
+                store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), false);
+                Play(deviceId);
+            }
         }
 
         /// <summary>
@@ -266,19 +268,19 @@ namespace MusicPickerService.Hubs
             bool sendTrack = (int)store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) == 0;
             QueueVote(deviceId);
 
-            store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), true);
-            store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
-
             string deviceClientId = store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
 
-            if (sendTrack && store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) > 0)
+            if (store.ListLength(String.Format("musichub.device.{0}.queue", deviceId)) > 0)
             {
+                store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), true);
+                store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
+
                 Clients.Client(deviceClientId).Stop();
                 string currentDeviceTrack = UpdateState(deviceId);
                 Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
+                Clients.Client(deviceClientId).Play();
+                SendClientState(deviceId);
             }
-            Clients.Client(deviceClientId).Play();
-            SendClientState(deviceId);
         }
 
         /// <summary>
@@ -363,17 +365,7 @@ namespace MusicPickerService.Hubs
                 return;
             }
 
-            string currentDeviceTrack = UpdateState(deviceId);
-
-            SendClientState(deviceId);
-
-            if (currentDeviceTrack != null)
-            {
-                string deviceClientId = store.StringGet(String.Format("musichub.device.{0}.connection", deviceId));
-                Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
-
-                Play(deviceId);
-            }
+            Play(deviceId);
         }
 
         /// <summary>
