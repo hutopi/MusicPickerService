@@ -138,6 +138,8 @@ namespace MusicPickerService.Controllers
                 {
                     album = new Album() { Name = submission.Album, Year = submission.Year, ArtistId = artist.Id };
                     db.Albums.Add(album);
+
+                    BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
                 }
                 else
                 {
@@ -184,9 +186,6 @@ namespace MusicPickerService.Controllers
                 {
 
                 }
-
-
-                BackgroundJob.Enqueue<SubmitDevice>(x => x.GetArtwork(submission));
             }
         }
     }
