@@ -57,18 +57,18 @@ namespace MusicPickerService.Controllers
 
             if (result.IsSuccessStatusCode)
             {
-                JObject search = JObject.Parse(result.Content.ReadAsStringAsync().Result);
-                if (search["album"] != null)
+                try
                 {
-                    if (search["album"]["image"] != null)
+                    JObject search = JObject.Parse(result.Content.ReadAsStringAsync().Result);
+                    if (search["album"] != null)
                     {
-                        List<JToken> results = search["album"]["image"].Children().ToList();
-                        if (results.Count > 0)
+                        if (search["album"]["image"] != null)
                         {
-                            string url = results[results.Count - 1]["#text"].ToString();
-
-                            try
+                            List<JToken> results = search["album"]["image"].Children().ToList();
+                            if (results.Count > 0)
                             {
+                                string url = results[results.Count - 1]["#text"].ToString();
+
                                 Album album = (from a in db.Albums
                                                where a.Name == submission.Album
                                                select a).First();
@@ -77,12 +77,12 @@ namespace MusicPickerService.Controllers
                                 db.Albums.AddOrUpdate(album);
                                 db.SaveChanges();
                             }
-                            catch (Exception e)
-                            {
-
-                            }
                         }
                     }
+                }
+                catch (Exception e)
+                {
+
                 }
             }
         }
