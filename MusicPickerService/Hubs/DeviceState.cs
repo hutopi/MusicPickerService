@@ -30,6 +30,11 @@ namespace MusicPickerService.Hubs
         /// <value><c>true</c> if playing; otherwise, <c>false</c>.</value>
         public bool Playing { get; set; }
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="DeviceState"/> is paused.
+        /// </summary>
+        /// <value><c>true</c> if paused; otherwise, <c>false</c>.</value>
+        public bool Paused { get; set; }
+        /// <summary>
         /// Gets or sets the current track id.
         /// </summary>
         /// <value>The current.</value>

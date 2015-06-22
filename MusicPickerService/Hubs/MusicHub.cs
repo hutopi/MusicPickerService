@@ -129,6 +129,7 @@ namespace MusicPickerService.Hubs
                 store.KeyDelete(String.Format("musichub.device.{0}.current", deviceId));
                 store.KeyDelete(String.Format("musichub.device.{0}.duration", deviceId));
                 store.KeyDelete(String.Format("musichub.device.{0}.playing", deviceId));
+                store.KeyDelete(String.Format("musichub.device.{0}.paused", deviceId));
                 store.KeyDelete(String.Format("musichub.device.{0}.lastpause", deviceId));
                 store.KeyDelete(String.Format("musichub.device.{0}.queue", deviceId));
                 store.KeyDelete(String.Format("musichub.device.{0}.queue.device", deviceId));
@@ -161,6 +162,7 @@ namespace MusicPickerService.Hubs
                 Current = (int)store.StringGet(String.Format("musichub.device.{0}.current", deviceId)),
                 Duration = (int)store.StringGet(String.Format("musichub.device.{0}.duration", deviceId)),
                 Playing = (bool)store.StringGet(String.Format("musichub.device.{0}.playing", deviceId)),
+                Paused = (bool)store.StringGet(String.Format("musichub.device.{0}.paused", deviceId)),
                 LastPause = DateTime.FromFileTimeUtc((long)store.StringGet(String.Format("musichub.device.{0}.lastpause", deviceId))),
                 Queue = (int[])Array.ConvertAll(store.ListRange(String.Format("musichub.device.{0}.queue", deviceId)), item => (int)item)
             };
@@ -275,10 +277,19 @@ namespace MusicPickerService.Hubs
                 store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), true);
                 store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
 
-                Clients.Client(deviceClientId).Stop();
-                string currentDeviceTrack = UpdateState(deviceId);
-                Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
-                Clients.Client(deviceClientId).Play();
+
+                if (!(bool) store.StringGet(String.Format("musichub.device.{0}.paused", deviceId)))
+                {
+                    Clients.Client(deviceClientId).Stop();
+                    string currentDeviceTrack = UpdateState(deviceId);
+                    Clients.Client(deviceClientId).SetTrackId(currentDeviceTrack);
+                }
+                else
+                {
+                    store.StringSet(String.Format("musichub.device.{0}.paused", deviceId), false);
+                }
+
+                Clients.Client(deviceClientId).Play();    
                 SendClientState(deviceId);
             }
         }
@@ -297,6 +308,7 @@ namespace MusicPickerService.Hubs
             }
 
             store.StringSet(String.Format("musichub.device.{0}.playing", deviceId), false);
+            store.StringSet(String.Format("musichub.device.{0}.paused", deviceId), true);
             store.StringSet(String.Format("musichub.device.{0}.lastpause", deviceId), DateTime.Now.ToFileTimeUtc());
 
             SendClientState(deviceId);

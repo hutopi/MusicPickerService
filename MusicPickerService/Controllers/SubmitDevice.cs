@@ -52,12 +52,11 @@ namespace MusicPickerService.Controllers
         {
             string key = "2c2e6ce34b0d78dac557611b898bf547";
             Uri uri = new Uri(String.Format("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key={0}&artist={1}&album={2}&format=json", key, submission.Artist, submission.Album));
-
-            HttpResponseMessage result = (new HttpClient()).GetAsync(uri).Result;
-
-            if (result.IsSuccessStatusCode)
+            try
             {
-                try
+                HttpResponseMessage result = (new HttpClient()).GetAsync(uri).Result;
+
+                if (result.IsSuccessStatusCode)
                 {
                     JObject search = JObject.Parse(result.Content.ReadAsStringAsync().Result);
                     if (search["album"] != null)
@@ -80,10 +79,10 @@ namespace MusicPickerService.Controllers
                         }
                     }
                 }
-                catch (Exception e)
-                {
+            }
+            catch (Exception e)
+            {
 
-                }
             }
         }
 
