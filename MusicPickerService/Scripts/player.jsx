@@ -24,11 +24,11 @@ var TrackInfo = React.createClass({
             }
         };
 
-        jQuery.ajax('http://localhost:50559/api/Tracks/' + props.id, options).done(function(track) {
+        jQuery.ajax('/api/Tracks/' + props.id, options).done(function(track) {
             this.setState({title: track.Name});
-            jQuery.ajax('http://localhost:50559/api/Albums/' + track.AlbumId, options).done(function(album) {
+            jQuery.ajax('/api/Albums/' + track.AlbumId, options).done(function(album) {
                 this.setState({image: album.Artwork});
-                jQuery.ajax('http://localhost:50559/api/Artists/' + album.ArtistId, options).done(function(artist) {
+                jQuery.ajax('/api/Artists/' + album.ArtistId, options).done(function(artist) {
                     this.setState({artist: artist.Name});
                 }.bind(this));
             }.bind(this));

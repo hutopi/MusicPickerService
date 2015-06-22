@@ -200,7 +200,7 @@ var AuthStore = Fluxxor.createStore({
     },
 
     signIn: function(payload) {
-        jQuery.ajax('http://localhost:50559/oauth/token', {
+        jQuery.ajax('/oauth/token', {
             method: 'POST',
             data: {
                 grant_type: 'password',
@@ -209,7 +209,7 @@ var AuthStore = Fluxxor.createStore({
             }
         }).done(function(data) {
             this.bearer = data.access_token
-            jQuery.ajax('http://localhost:50559/api/Devices', {
+            jQuery.ajax('/api/Devices', {
                 headers: {
                     'Authorization': 'Bearer ' + this.bearer
                 }
@@ -234,5 +234,3 @@ var flux = new Fluxxor.Flux({
 
 var musicHubProxy = $.connection.musicHub;
 musicHubProxy.client.setState = flux.actions.receiveDeviceState;
-
-$.connection.hub.url ='http://localhost:50559/signalr';

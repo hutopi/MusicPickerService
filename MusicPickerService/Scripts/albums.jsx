@@ -37,10 +37,10 @@ var AlbumsView = React.createClass({
 
     componentDidMount: function() {
         if (this.props.artist === null) {
-            var url = "http://localhost:50559/api/Albums?device=" + this.props.device;
+            var url = "/api/Albums?device=" + this.props.device;
         }
         else {
-            var url = "http://localhost:50559/api/Albums?device=" + this.props.device + "&artist=" + this.props.artist;
+            var url = "/api/Albums?device=" + this.props.device + "&artist=" + this.props.artist;
         }
 
         jQuery.ajax(url, {

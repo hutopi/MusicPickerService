@@ -31,10 +31,10 @@ var TracksView = React.createClass({
 
     componentDidMount: function() {
         if (this.props.album === null) {
-            var url = "http://localhost:50559/api/Tracks?device=" + this.props.device;
+            var url = "/api/Tracks?device=" + this.props.device;
         }
         else {
-            var url = "http://localhost:50559/api/Tracks?device=" + this.props.device + "&album=" + this.props.album;
+            var url = "/api/Tracks?device=" + this.props.device + "&album=" + this.props.album;
         }
 
         jQuery.ajax(url, {
