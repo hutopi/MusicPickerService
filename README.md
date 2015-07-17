@@ -1,3 +1,11 @@
+Deprecation notice
+==================
+Musicpicker has been rewritten in Node.js, with many feature additions and performance improvements.
+This repository is the original C#/.NET web backend and is no longer supported.
+
+Please check out the project's Node rewrite on [GitHub](https://github.com/musicpicker/musicpicker/) and
+the managed cloud service http://musicpicker.net.
+
 # MusicPickerService
 
 Web service that implements APIs, data storage and SignalR hub for the MusicPicker project.
