@@ -3,8 +3,8 @@ Deprecation notice
 Musicpicker has been rewritten in Node.js, with many feature additions and performance improvements.
 This repository is the original C#/.NET web backend and is no longer supported.
 
-Please check out the project's Node rewrite on [GitHub](https://github.com/musicpicker/musicpicker/) and
-the managed cloud service http://musicpicker.net.
+Please check out the project's Node rewrite on GitHub at [musicpicker/musicpicker/](https://github.com/musicpicker/musicpicker/) and
+the managed cloud service at [musicpicker.net](http://musicpicker.net).
 
 # MusicPickerService
 
@@ -26,8 +26,6 @@ MusicPickerService is the central piece of MusicPicker's ecosystem.
 - Device playback control
 - Artwork fetching
 - Web UI
-
-Managed cloud version is available at [musicpicker.cloudapp.net](http://musicpicker.cloudapp.net)
 
 Dependencies
 ===========
